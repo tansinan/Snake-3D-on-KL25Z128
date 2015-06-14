@@ -17,6 +17,8 @@ struct
 	void (*handler)();
 } Timer_data[TIMER_MAX_AMOUNT];
 
+
+static int systemTime = 0;
 /**
  * Timer_init函数初始化系统计时器
  * @param duration 设置的时间，单位为0.1ms
@@ -80,4 +82,10 @@ void SysTick_Handler(void)
 		}
 	}
 	i = SYST_CSR;
+	systemTime++;
+}
+
+uint32 Timer_getSystemTime()
+{
+	return systemTime;
 }

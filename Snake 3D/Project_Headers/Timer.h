@@ -17,6 +17,6 @@ void Timer_init(uint16 duration);
 int8 Timer_set(uint16 frequency, void (*handler)());
 void Timer_unset(int8 timerId);
 void Timer_disable();
-void SysTick_Handler();
+uint32 Timer_getSystemTime();
 
 #endif /* TIMER_H_ */

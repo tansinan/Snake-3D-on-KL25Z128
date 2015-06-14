@@ -31,7 +31,6 @@ void AppReactionTime_init()
 void AppReactionTime_onDrawHandler()
 {
 	OLEDFB_drawTextEx(0, 0, 12, 12, "Are you swift?");
-	OLEDFB_draw
 }
 void AppReactionTime_eventHandler(int event, int data)
 {
