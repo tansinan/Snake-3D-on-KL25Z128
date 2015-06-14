@@ -18,7 +18,8 @@
 
 static const char* startText1 = "Are you?";
 static const char* startText2 = "QUICK?";
-static void animationHandler();
+static const char* startText3 = "ANYKEY=CONTINUE";
+static void animationTimerHandler();
 static uint8 animationTimerId;
 
 
@@ -29,7 +30,7 @@ static void eventHandler();
 static struct
 {
 	uint8 state;
-	int startAnimationStage;
+	uint8 splashAnimationCounter;
 	int countDownNumber;
 	int countDownDuration;
 	int gameTimer;
@@ -45,8 +46,22 @@ static void paintHandler()
 	switch(gameData.state)
 	{
 	case STATE_SPLASH:
-		OLEDFB_drawTextEx(0, 0, 12, 12, startText1);
-		OLEDFB_drawTextEx(20, 20, 12, 12, startText2);
+		if(gameData.splashAnimationCounter < 50)
+		{
+			OLEDFB_drawTextEx(100 - 2 * gameData.splashAnimationCounter, 10, 12, 12, startText1);
+		}
+		else if(gameData.splashAnimationCounter < 100)
+		{
+			OLEDFB_drawTextEx(0, 10, 12, 12, startText1);
+			OLEDFB_drawTextEx(gameData.splashAnimationCounter - 50, 30, 12, 12, startText2);
+		}
+		else
+		{
+			OLEDFB_drawTextEx(0, 10, 12, 12, startText1);
+			OLEDFB_drawTextEx(50, 30, 12, 12, startText2);
+			OLEDFB_drawText(4, 45, startText3);
+		}
+		OLEDFB_drawCircle(64,32,31,OLEDFB_INVERTED);
 		break;
 	}
 }
@@ -56,7 +71,8 @@ static void eventHandler(int event, int data)
 	{
 	case EVENT_APP_INIT:
 		gameData.state = STATE_SPLASH;
-		animationTimerId = Timer_set(50);
+		gameData.splashAnimationCounter = 0;
+		animationTimerId = Timer_set(20, animationTimerHandler);
 		break;
 	case EVENT_APP_QUIT:
 		Timer_unset(animationTimerId);
@@ -64,4 +80,10 @@ static void eventHandler(int event, int data)
 	}
 }
 
-static void animationTimerHandler();
+static void animationTimerHandler()
+{
+	if(gameData.state == STATE_SPLASH && gameData.splashAnimationCounter < 100)
+	{
+		gameData.splashAnimationCounter++;
+	}
+}

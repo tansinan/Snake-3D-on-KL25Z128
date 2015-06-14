@@ -20,7 +20,12 @@ void App_create(App* app, void (*paintHandler)(), void (*eventHandler)(int event
 
 void App_switchTo(App* app)
 {
+	if(currentApp != NULL)
+	{
+		App_sendMessage(EVENT_APP_QUIT, 0);
+	}
 	currentApp = app;
+	App_sendMessage(EVENT_APP_INIT, 0);
 }
 
 App* App_getCurrentApp()
