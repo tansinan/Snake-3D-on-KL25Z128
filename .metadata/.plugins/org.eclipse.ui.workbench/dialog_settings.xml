@@ -14,7 +14,7 @@
 	</section>
 	<section name="WorkbenchPreferenceDialogSettings">
 		<item value="8" key="DIALOG_Y_ORIGIN"/>
-		<item value="8" key="DIALOG_X_ORIGIN"/>
+		<item value="261" key="DIALOG_X_ORIGIN"/>
 	</section>
 	<section name="ImportExportAction">
 		<item value="org.eclipse.ui.wizards.import.ExternalProject" key="ImportExportPage.STORE_SELECTED_IMPORT_WIZARD_ID"/>
