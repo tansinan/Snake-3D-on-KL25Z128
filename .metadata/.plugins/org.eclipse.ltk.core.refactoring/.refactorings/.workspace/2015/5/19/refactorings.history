@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">&#x0A;<refactoring comment="Delete resource &apos;Hello Display/Sources/DigitalTube.cpp&apos;" deleteContents="false" description="Delete resource &apos;Hello Display/Sources/DigitalTube.cpp&apos;" element1="/Hello Display/Sources/DigitalTube.cpp" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1430959016848"/>&#x0A;<refactoring comment="Delete resource &apos;Hello Display/Timer.h&apos;" deleteContents="false" description="Delete resource &apos;Hello Display/Timer.h&apos;" element1="/Hello Display/Timer.h" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1430959482133"/>
-</session>
