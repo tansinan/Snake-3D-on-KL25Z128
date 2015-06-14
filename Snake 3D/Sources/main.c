@@ -50,13 +50,12 @@ int main(void)
     //OLEDFB3D_projectPoint(vec1,vec2);
 	
     Snake_init();
+    AppReactionTime_init();
     
     App snakeApp;
     App_create(&snakeApp, Snake_onDrawHandler, Snake_eventHandler);
     
-    App reactApp;
-    App_create(&reactApp, AppReactionTime_onDrawHandler, AppReactionTime_eventHandler);
-    App_switchTo(&reactApp);
+    App_switchTo(&AppReactionTime_theApp);
     
     
 	for(;;)

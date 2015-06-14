@@ -10,35 +10,58 @@
 #include "Button.h"
 #include "OLEDFB.h"
 
-static const startText1 = "Are you?";
-static const startText2 = "QUICK?";
+#define STATE_SPLASH  0
+#define STATE_READY  1
+#define STATE_COUNT_DOWN 2
+#define STATE_GAME 3
+#define STATE_GAMEOVER 4
+
+static const char* startText1 = "Are you?";
+static const char* startText2 = "QUICK?";
+static void animationHandler();
+static uint8 animationTimerId;
+
+
+static void paintHandler();
+
+static void eventHandler();
 
 static struct
 {
-	int state;
+	uint8 state;
 	int startAnimationStage;
 	int countDownNumber;
 	int countDownDuration;
 	int gameTimer;
 } gameData;
 
-
 void AppReactionTime_init()
 {
-	
+	App_create(&AppReactionTime_theApp, paintHandler, eventHandler);
 }
 
-void AppReactionTime_onDrawHandler()
+static void paintHandler()
 {
-	OLEDFB_drawTextEx(0, 0, 12, 12, "Are you swift?");
+	switch(gameData.state)
+	{
+	case STATE_SPLASH:
+		OLEDFB_drawTextEx(0, 0, 12, 12, startText1);
+		OLEDFB_drawTextEx(20, 20, 12, 12, startText2);
+		break;
+	}
 }
-void AppReactionTime_eventHandler(int event, int data)
+static void eventHandler(int event, int data)
 {
 	switch(event)
 	{
 	case EVENT_APP_INIT:
+		gameData.state = STATE_SPLASH;
+		animationTimerId = Timer_set(50);
 		break;
 	case EVENT_APP_QUIT:
+		Timer_unset(animationTimerId);
 		break;
 	}
 }
+
+static void animationTimerHandler();

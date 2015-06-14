@@ -14,8 +14,4 @@ App AppReactionTime_theApp;
 
 void AppReactionTime_init();
 
-void AppReactionTime_onDrawHandler();
-
-void AppReactionTime_eventHandler(int event, int data);
-
 #endif /* APPREACTIONTIME_H_ */
