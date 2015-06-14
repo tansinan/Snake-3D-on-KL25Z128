@@ -12,6 +12,8 @@ static struct
 	int state;
 	int startScreenStage;
 	int startScrrenAnimationTime;
+	int countDownNumber;
+	int countDownDuration;
 } gameData;
 
 
