@@ -1,0 +1,15 @@
+/*
+ * Buzzer.c
+ *
+ *  Created on: Jun 14, 2015
+ *      Author: tansinan
+ */
+
+#include "Buzzer.h"
+
+void Buzzer_init()
+{
+	
+}
+
+void Buzzer_set(int frequency, int volume);

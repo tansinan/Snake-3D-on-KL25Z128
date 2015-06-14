@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Snake 3D/Sources/Snake.c&apos; to &apos;SnakeLogic.c&apos;" description="Rename resource &apos;Snake.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Sources/Snake.c" name="SnakeLogic.c" stamp="1433424126968" updateReferences="true"/>
+</session>

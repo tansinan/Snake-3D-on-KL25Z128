@@ -1,0 +1,18 @@
+/*
+ * Buzzer.c
+ *
+ *  Created on: Jun 14, 2015
+ *      Author: tansinan
+ */
+
+#include "Buzzer.h"
+
+void Buzzer_init()
+{
+	SIM_SOPT2 |= SUM_SOPT2_TPMSRC(1);
+}
+
+void Buzzer_set(int frequency, int volume)
+{
+	
+}

@@ -1,0 +1,16 @@
+/*
+ * Button.h
+ *
+ *  Created on: Jun 11, 2015
+ *      Author: tansinan
+ */
+
+#ifndef BUTTON_H_
+#define BUTTON_H_
+
+void Button_init();
+void Button_setHandler();
+void Button_timerHandler();
+
+
+#endif /* BUTTON_H_ */

@@ -1,0 +1,14 @@
+/*
+ * Buzzer.h
+ *
+ *  Created on: Jun 14, 2015
+ *      Author: tansinan
+ */
+
+#ifndef BUZZER_H_
+#define BUZZER_H_
+
+void Buzzer_init();
+
+
+#endif /* BUZZER_H_ */

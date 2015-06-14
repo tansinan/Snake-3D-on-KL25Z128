@@ -1,0 +1,26 @@
+/*
+ * Button.h
+ *
+ *  Created on: Jun 11, 2015
+ *      Author: tansinan
+ */
+
+#ifndef BUTTON_H_
+#define BUTTON_H_
+
+#define KEY_UP 0
+#define KEY_DOWN 1
+#define KEY_LEFT 2
+#define KEY_RIGHT 3
+#define KEY_A 4
+#define KEY_B 5
+#define KEY_C 6
+#define KEY_D 7
+#define EVENT_KEY_UP 100;
+
+void Button_init();
+void Button_onTimer();
+void Button_setHandler();
+
+
+#endif /* BUTTON_H_ */

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Snake 3D/Project_Headers/AppFramework&apos; to &apos;AppFramework.h&apos;" description="Rename resource &apos;AppFramework&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Project_Headers/AppFramework" name="AppFramework.h" stamp="1433982604438" updateReferences="true"/>
+</session>

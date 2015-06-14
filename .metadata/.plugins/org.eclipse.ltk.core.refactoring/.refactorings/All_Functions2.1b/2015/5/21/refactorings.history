@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;All_Functions2.1b/Project_Headers/AppSensorTest&apos; to &apos;AppSensorTest.h&apos;" description="Rename resource &apos;AppSensorTest&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Project_Headers/AppSensorTest" name="AppSensorTest.h" stamp="1432384014585" updateReferences="true"/>
+</session>

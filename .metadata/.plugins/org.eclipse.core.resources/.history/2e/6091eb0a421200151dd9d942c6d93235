@@ -1,0 +1,22 @@
+/*
+ * AppReactionTime.h
+ *
+ *  Created on: Jun 14, 2015
+ *      Author: tansinan
+ */
+
+#ifndef APPREACTIONTIME_H_
+#define APPREACTIONTIME_H_
+
+void AppReactionTime_init();
+void AppReactionTime_onDrawHandler();
+
+void AppReactionTime_drawTerrain();
+
+void AppReactionTime_drawSnake();
+
+void AppReactionTime_eventHandler(int event, int data);
+
+void AppReactionTime_onTimer();
+
+#endif /* APPREACTIONTIME_H_ */
