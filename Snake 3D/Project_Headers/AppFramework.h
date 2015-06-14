@@ -10,6 +10,9 @@
 
 #include "Types.h"
 
+#define EVENT_APP_INIT 1
+#define EVENT_APP_QUIT 2
+
 typedef struct App
 {
 	void (*paintHandler)();

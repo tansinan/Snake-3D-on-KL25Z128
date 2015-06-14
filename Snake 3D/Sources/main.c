@@ -12,6 +12,7 @@
 #include "Button.h"
 #include "AppFramework.h"
 #include "Buzzer.h"
+#include "AppReactionTime.h"
 
 int counter = 0;
 int counter2 = 0;
@@ -34,7 +35,7 @@ int main(void)
 	OLEDFB_init();
 	Button_init();
 	Buzzer_init();
-	Buzzer_set(880,50);
+	//Buzzer_set(880,50);
 	
 	//用于调试的代码
 	Timer_set(16, updateCounter);
@@ -52,7 +53,10 @@ int main(void)
     
     App snakeApp;
     App_create(&snakeApp, Snake_onDrawHandler, Snake_eventHandler);
-    App_switchTo(&snakeApp);
+    
+    App reactApp;
+    App_create(&reactApp, AppReactionTime_onDrawHandler, AppReactionTime_eventHandler);
+    App_switchTo(&reactApp);
     
     
 	for(;;)

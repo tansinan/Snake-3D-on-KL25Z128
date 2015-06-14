@@ -8,7 +8,7 @@
 #include "Timer.h"
 #include "derivative.h"
 
-#define TIMER_MAX_AMOUNT 5
+#define TIMER_MAX_AMOUNT 10
 
 struct
 {
@@ -36,6 +36,9 @@ void Timer_init(uint16 duration)
 	}
 }
 
+/**
+ * Timer_set函数创建一个新的计时器
+ */
 int8 Timer_set(uint16 frequency, void (*handler)())
 {
 	for(int i=0;i<TIMER_MAX_AMOUNT;i++)
@@ -53,7 +56,7 @@ int8 Timer_set(uint16 frequency, void (*handler)())
 
 void Timer_unset(int8 timerId)
 {
-	
+	Timer_data[timerId].handler = nullptr;
 }
 
 void Timer_disable()
