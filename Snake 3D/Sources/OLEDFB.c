@@ -268,7 +268,7 @@ void OLEDFB_drawRect(int8 x1, int8 y1, int8 x2, int8 y2, uint8 mode)
 
 void OLEDFB_drawCircle(int8 x, int8 y, int8 r, uint8 mode)
 {
-	uint8 mid = r/sqrt(2);
+	uint16 mid = r/sqrt(2);
 	for(int16 i = -mid;i<=mid;i++)
 	{
 		int16 l = round(sqrt(r*r- i*i));
