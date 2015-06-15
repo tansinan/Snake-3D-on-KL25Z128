@@ -13,6 +13,7 @@
 #include "AppFramework.h"
 #include "Buzzer.h"
 #include "AppReactionTime.h"
+#include "AppMusicGame.h"
 
 int counter = 0;
 int counter2 = 0;
@@ -51,11 +52,12 @@ int main(void)
 	
     Snake_init();
     AppReactionTime_init();
+    AppMusicGame_init();
     
     App snakeApp;
     App_create(&snakeApp, Snake_onDrawHandler, Snake_eventHandler);
     
-    App_switchTo(&AppReactionTime_theApp);
+    App_switchTo(&AppMusicGame_theApp);
     
     
 	for(;;)
