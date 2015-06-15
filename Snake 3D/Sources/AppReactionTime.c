@@ -40,7 +40,6 @@ static struct
 	uint8 state;
 	uint8 splashAnimationCounter;
 	int countDownNumber;
-	int countDownDuration;
 	int gameTimer;
 } gameData;
 
@@ -84,6 +83,18 @@ static void paintHandler()
 			gameData.splashAnimationCounter = 0;
 		}
 		break;
+	case STATE_COUNT_DOWN:
+		OLEDFB_drawCharEx(32, 0, 64, 64, '0' + gameData.countDownNumber);
+		OLEDFB_drawCircle(64,32,gameData.splashAnimationCounter,OLEDFB_INVERTED);
+		if(gameData.splashAnimationCounter >= 50)
+		{
+			gameData.splashAnimationCounter = 0;
+			if(gameData.countDownNumber > 0)
+			{
+				gameData.countDownNumber--;
+			}
+			//TODO: Status Switch
+		}
 	}
 }
 static void eventHandler(int event, int data)
@@ -91,22 +102,35 @@ static void eventHandler(int event, int data)
 	switch(event)
 	{
 	case EVENT_APP_INIT:
-		gameData.state = STATE_SPLASH;
-		gameData.splashAnimationCounter = 0;
 		animationTimerId = Timer_set(20, animationTimerHandler);
+		setState(STATE_SPLASH);
 		break;
 	case EVENT_APP_QUIT:
 		Timer_unset(animationTimerId);
 		break;
 	case EVENT_KEY_DOWN:
-		if(gameData.state == STATE_SPLASH) setState(STATE_READY);
+		switch(gameData.state)
+		{
+		case STATE_SPLASH:
+			setState(STATE_READY);
+			break;
+		case STATE_READY:
+			if(data == KEY_A) setState(STATE_COUNT_DOWN);
+			//TODO : Implement return to menu.
+			else if(data == KEY_D);
+			break;
+		case STATE_COUNT_DOWN:
+			//TODO : Implement return to menu.
+			if(data == KEY_D);
+			break;
+		}
 		break;
 	}
 }
 
 static void animationTimerHandler()
 {
-	if(gameData.state == STATE_SPLASH && gameData.splashAnimationCounter < 100)
+	if(gameData.splashAnimationCounter < 100)
 	{
 		gameData.splashAnimationCounter++;
 	}
@@ -121,6 +145,10 @@ static void setState(int _state)
 		break;
 	case STATE_READY:
 		gameData.splashAnimationCounter = 0;
+		break;
+	case STATE_COUNT_DOWN:
+		gameData.splashAnimationCounter = 0;
+		gameData.countDownNumber = 3;
 		break;
 	}
 	gameData.state = _state;
