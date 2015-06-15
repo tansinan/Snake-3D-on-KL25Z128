@@ -5,6 +5,8 @@
  *      Author: tansinan
  */
 
+#include <stdio.h>
+
 #include "AppReactionTime.h"
 #include "AppFramework.h"
 #include "Button.h"
@@ -30,10 +32,15 @@ static void setState(int _state);
 
 static uint8 animationTimerId;
 
+static int gameBeginTime;
+
+static int keyPressedTime;
+
+static int historyBest = 0x0FFFFFFF;
 
 static void paintHandler();
 
-static void eventHandler();
+static void eventHandler(int event, int data);
 
 static struct
 {
@@ -93,7 +100,39 @@ static void paintHandler()
 			{
 				gameData.countDownNumber--;
 			}
-			//TODO: Status Switch
+			if(gameData.countDownNumber == 0)
+			{
+				setState(STATE_GAME);
+			}
+		}
+		break;
+	case STATE_GAME:
+		OLEDFB_drawTextEx(4, 12, 40, 40, "GO!");
+		if(gameBeginTime == 0)
+		{
+			OLEDFB_flush();
+			gameBeginTime = Timer_getSystemTime();
+		}
+		break;
+	case STATE_GAMEOVER:
+		{
+			char temp[30];
+			int duration = keyPressedTime - gameBeginTime;
+			OLEDFB_drawTextEx(4,4, 16,16, "SCORE:");
+			sprintf(temp, "%d.%d%d%d", duration/1000, (duration/100)%10, (duration/10)%10, duration%10);
+			OLEDFB_drawTextEx(20,20, 16,16, temp);
+			if(duration < historyBest)
+			{
+				OLEDFB_drawText(20,48,"New Record!");
+			}
+			else
+			{
+				sprintf(temp, "History Best:");
+				OLEDFB_drawText(20,48,temp);
+				sprintf(temp, "%d.%d%d%d", historyBest/1000, (historyBest/100)%10, (historyBest/10)%10, historyBest%10);
+				OLEDFB_drawText(28,56,temp);
+			}
+			break;
 		}
 	}
 }
@@ -123,6 +162,19 @@ static void eventHandler(int event, int data)
 			//TODO : Implement return to menu.
 			if(data == KEY_D);
 			break;
+		case STATE_GAME:
+			if(keyPressedTime == 0) keyPressedTime = Timer_getSystemTime();
+			setState(STATE_GAMEOVER);
+			break;
+		case STATE_GAMEOVER:
+			if(keyPressedTime - gameBeginTime < historyBest)
+			{
+				historyBest = keyPressedTime - gameBeginTime;
+			}
+			if(data == KEY_A) setState(STATE_READY);
+			//TODO : Implement return to menu.
+			else if(data == KEY_D);
+			break;
 		}
 		break;
 	}
@@ -149,6 +201,12 @@ static void setState(int _state)
 	case STATE_COUNT_DOWN:
 		gameData.splashAnimationCounter = 0;
 		gameData.countDownNumber = 3;
+		break;
+	case STATE_GAME:
+		gameBeginTime = 0;
+		keyPressedTime = 0;
+		break;
+	case STATE_GAMEOVER:
 		break;
 	}
 	gameData.state = _state;
