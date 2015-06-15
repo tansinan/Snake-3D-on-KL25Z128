@@ -144,13 +144,13 @@ void OLEDFB_drawBitmapEx(uint8 x, uint8 y, uint8 width, uint8 height, uint8* bit
 	}
 }
 
-void OLEDFB_drawChar(uint8 x, uint8 y, uchar c)
+void OLEDFB_drawChar(uint8 x, uint8 y, const uchar c)
 {
 	if(c<0x20||x>=0x80) return;
 	OLEDFB_drawBitmap(x, y, &OLEDFONT[(c-0x20)*8], 8, 8);
 }
 
-void OLEDFB_drawText(uint8 x, uint8 y, uchar* str)
+void OLEDFB_drawText(uint8 x, uint8 y, const uchar* str)
 {
 	while((*str)!='\0')
 	{
@@ -160,13 +160,13 @@ void OLEDFB_drawText(uint8 x, uint8 y, uchar* str)
 	}
 }
 
-void OLEDFB_drawCharEx(uint8 x, uint8 y, uint8 charWidth, uint8 charHeight, uchar c)
+void OLEDFB_drawCharEx(uint8 x, uint8 y, uint8 charWidth, uint8 charHeight, const uchar c)
 {
 	if(c<0x20||x>=0x80) return;
 	OLEDFB_drawBitmapEx(x, y, charWidth, charHeight, &OLEDFONT[(c-0x20)*8], 8, 8);
 }
 
-void OLEDFB_drawTextEx(uint8 x, uint8 y, uint8 charWidth, uint8 charHeight, uchar* str)
+void OLEDFB_drawTextEx(uint8 x, uint8 y, uint8 charWidth, uint8 charHeight, const uchar* str)
 {
 	while((*str)!='\0')
 	{

@@ -27,10 +27,10 @@ void OLEDFB_drawBitmap(uint8 x, uint8 y, uint8* bitmap, uint8 srcWidth, uint8 sr
 
 void OLEDFB_drawBitmapEx(uint8 x, uint8 y, uint8 width, uint8 height, uint8* bitmap, uint8 srcWidth, uint8 srcHeight);
 
-void OLEDFB_drawChar(uint8 x, uint8 y, uchar c);
-void OLEDFB_drawCharEx(uint8 x, uint8 y, uint8 charWidth, uint8 charHeight, uchar c);
-void OLEDFB_drawText(uint8 x, uint8 y, uchar* str);
-void OLEDFB_drawTextEx(uint8 x, uint8 y, uint8 charWidth, uint8 charHeight, uchar* str);
+void OLEDFB_drawChar(uint8 x, uint8 y, const uchar c);
+void OLEDFB_drawCharEx(uint8 x, uint8 y, uint8 charWidth, uint8 charHeight, const uchar c);
+void OLEDFB_drawText(uint8 x, uint8 y, const uchar* str);
+void OLEDFB_drawTextEx(uint8 x, uint8 y, uint8 charWidth, uint8 charHeight, const uchar* str);
 
 void OLEDFB_drawRect(int8 x1, int8 y1, int8 x2, int8 y2, uint8 mode);
 void OLEDFB_drawLine(int16 x1, int16 y1, int16 x2, int16 y2);
