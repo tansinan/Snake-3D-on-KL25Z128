@@ -8,7 +8,7 @@
 #ifndef MUSIC_H_
 #define MUSIC_H_
 
-extern int Music_frequencyTable[];
+extern int frequencyTable[];
 
 typedef struct
 {

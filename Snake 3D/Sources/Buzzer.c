@@ -28,6 +28,11 @@ void Buzzer_init()
 
 void Buzzer_set(uint32 frequency, uint8 volume)
 {
+	if(frequency == 0|| volume == 0)
+	{
+		TPM2_C0V = 0x00;
+		return;
+	}
 	TPM2_CNT = 0;
 	TPM2_MOD = 163828 / frequency;
 	TPM2_C0V = 163828 / 2 / frequency;
