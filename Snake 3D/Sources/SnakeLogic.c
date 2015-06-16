@@ -8,11 +8,13 @@
 #include "Types.h"
 #include "OLEDFB3D.h"
 #include "SnakeLogic.h"
+#include "Timer.h"
 #include "Button.h"
 
+App Snake3D_theApp;
+
 const uint8 MAP_NORMAL = 0;
-const uint8 MAP_ENERGY_BLOCK = 1;
-const uint8 MAP_ACCELERATOR_PATH = 2;
+const uint8 MAP_FOOD = 1;
 const uint8 MAP_WALL_HARD = 3;
 const uint8 MAP_WALL_SOFT = 4;
 
@@ -21,9 +23,18 @@ const uint8 SNAKE_DIRECTION_DOWN = 1;
 const uint8 SNAKE_DIRECTION_LEFT = 2;
 const uint8 SNAKE_DIRECTION_RIGHT = 3;
 
-static void drawTerrain(int centerX, int centerY);
-static void drawSnake();
+static uint8 animationTimerId;
 
+static uint16 animationCounter;
+
+static void animationTimerHandler();
+
+static void drawTerrain();
+static void drawSnake();
+void Snake3D_init();
+static void Snake_init();
+static void paintHandler();
+static void eventHandler(int event, int data);
 
 struct Snake_Game
 {
@@ -35,6 +46,10 @@ struct Snake_Game
 	uint8 viewPortCenterX;
 	uint8 viewPortCenterY;
 } snakeGame;
+
+static int8 lastPressedKey = -1;
+
+static uint8 snakeDirection;
 
 //获取 (x2,y2) 相对于 (x1,y1)的相对位置关系
 static int relativePosition(int x1, int y1, int x2, int y2)
@@ -52,7 +67,12 @@ static int relativePosition(int x1, int y1, int x2, int y2)
 	return -1;
 }
 
-void Snake_init()
+void Snake3D_init()
+{
+	App_create(&Snake3D_theApp, paintHandler, eventHandler);
+}
+
+static void Snake_init()
 {
 	//初始化地图
 	for(int i=0;i<20;i++)
@@ -66,18 +86,19 @@ void Snake_init()
 			else
 			{
 				int rnd = rand();
-				if(rnd%8==0) snakeGame.map[i][j] = MAP_WALL_HARD;
+				if(rnd%10==0) snakeGame.map[i][j] = MAP_WALL_HARD;
+				else if(rnd%10 == 1) snakeGame.map[i][j] = MAP_FOOD;
 				else snakeGame.map[i][j] = MAP_NORMAL;
 			}
 		}
 	}
 	snakeGame.snakeHead = 0;
-	/*for(int i=0;i<5;i++)
+	for(int i=0;i<3;i++)
 	{
-		snakeGame.snakePositions[i][0] = 5 + i;
-		snakeGame.snakePositions[i][1] = 5;
-	}*/
-	snakeGame.snakePositions[0][0] = 5;
+		snakeGame.snakePositions[i][0] = 5;
+		snakeGame.snakePositions[i][1] = 5 + i;
+	}
+	/*snakeGame.snakePositions[0][0] = 5;
 	snakeGame.snakePositions[0][1] = 5;
 	snakeGame.snakePositions[1][0] = 5;
 	snakeGame.snakePositions[1][1] = 6;
@@ -94,30 +115,50 @@ void Snake_init()
 	snakeGame.snakePositions[7][0] = 4;
 	snakeGame.snakePositions[7][1] = 5;
 	snakeGame.snakePositions[8][0] = 4;
-	snakeGame.snakePositions[8][1] = 6;
-	for(int i=0;i<9;i++)
+	snakeGame.snakePositions[8][1] = 6;*/
+	/*for(int i=0;i<9;i++)
 	{
 		snakeGame.snakePositions[i][0] = 10 - snakeGame.snakePositions[i][0];
-	}
+	}*/
 	/*snakeGame.snakePositions[4][0] = 6;
 	snakeGame.snakePositions[4][1] = 4;*/
-	snakeGame.snakeLength = 9;
+	snakeGame.snakeLength = 3;
 	snakeGame.viewPortCenterX = 3;
 	snakeGame.viewPortCenterY = 3;
 }
 
-static void drawTerrain(int centerX, int centerY)
+static void drawTerrain()
 {
 	//绘制背景的地形图。需要注意的是x方向的中轴对应x=0
 	//y 为常量，-0.5
 	//z只能为负。
 	//目前规划的绘制区域大小为7*7
-	centerX = snakeGame.snakePositions[0][0];
-	centerY = snakeGame.snakePositions[0][1];
-	int paintRegionX1 = centerX - 3;
-	int paintRegionY1 = centerY - 3;
-	int paintRegionX2 = centerX + 3;
-	int paintRegionY2 = centerY + 3;
+	
+	float centerX = snakeGame.snakePositions[0][0];
+	float centerY = snakeGame.snakePositions[0][1];
+	
+	
+	if(snakeDirection == SNAKE_DIRECTION_UP)
+	{
+		centerY -= animationCounter /100.0*0.5;
+	}
+	else if(snakeDirection == SNAKE_DIRECTION_DOWN)
+	{
+		centerY += animationCounter /100.0*0.5;
+	}
+	else if(snakeDirection == SNAKE_DIRECTION_LEFT)
+	{
+		centerX -= animationCounter /100.0*0.5;
+	}
+	else if(snakeDirection == SNAKE_DIRECTION_RIGHT)
+	{
+		centerX += animationCounter /100.0*0.5;
+	}
+	
+	int paintRegionX1 = centerX - 4;
+	int paintRegionY1 = centerY - 4;
+	int paintRegionX2 = centerX + 4;
+	int paintRegionY2 = centerY + 4;
 	if(paintRegionX1 < 0) paintRegionX1 = 0;
 	if(paintRegionX2 > 19) paintRegionX2 = 19;
 	if(paintRegionY1 < 0) paintRegionY1 = 0;
@@ -203,59 +244,6 @@ static void drawSnake()
         	lastPoint[0][2] = 0.5*relativeY - 1.25;
         	continue;
     	}
-    	/*else if (i == 1)
-    	{
-			currentPoint[0][1] = yLow;
-			currentPoint[1][1] = yLow;
-			currentPoint[2][1] = -0.4;
-    		if(relPos == SNAKE_DIRECTION_DOWN)
-    		{
-				currentPoint[0][0] = relativeX-0.4;
-				currentPoint[0][2] = 0.5*relativeY - 1.5;
-				currentPoint[1][0] = relativeX+0.4;
-				currentPoint[1][2] = 0.5*relativeY - 1.5;
-				currentPoint[2][0] = relativeX;
-				currentPoint[2][2] = 0.5*relativeY - 1.5;
-    		}
-    		else if(relPos == SNAKE_DIRECTION_UP)
-    		{
-				currentPoint[0][0] = relativeX-0.4;
-				currentPoint[0][2] = 0.5*(relativeY + 1) - 1.5;
-				currentPoint[1][0] = relativeX+0.4;
-				currentPoint[1][2] = 0.5*(relativeY + 1) - 1.5;
-				currentPoint[2][0] = relativeX;
-				currentPoint[2][2] = 0.5*(relativeY + 1) - 1.5;
-    		}
-    		else if(relPos == SNAKE_DIRECTION_LEFT)
-    		{
-				currentPoint[0][0] = relativeX * 0.5 + 0.25;
-				currentPoint[0][2] = 0.5*(relativeY + 1) - 1.75 + 0.4;
-				currentPoint[1][0] = relativeX * 0.5 + 0.25;
-				currentPoint[1][2] = 0.5*(relativeY + 1) - 1.75 - 0.4;
-				currentPoint[2][0] = relativeX * 0.5;
-				currentPoint[2][2] = 0.5*(relativeY + 1) - 1.75;
-    		}
-    		else if(relPos == SNAKE_DIRECTION_RIGHT)
-    		{
-				currentPoint[0][0] = relativeX * 0.5 - 0.25;
-				currentPoint[0][2] = 0.5*(relativeY + 1) - 1.75 + 0.4;
-				currentPoint[1][0] = relativeX * 0.5 - 0.25;
-				currentPoint[1][2] = 0.5*(relativeY + 1) - 1.75 - 0.4;
-				currentPoint[2][0] = relativeX * 0.5;
-				currentPoint[2][2] = 0.5*(relativeY + 1) - 1.75;
-    		}
-    		for(int i=0;i<3;i++)
-    		{
-    			OLEDFB3D_drawLine3D(lastPoint[0],currentPoint[i]);
-    		}
-    		for(int i=0;i<3;i++)
-    		{
-    			for(int k=0;k<i;k++)
-    			{
-    				OLEDFB3D_drawLine3D(currentPoint[i],currentPoint[k]);
-    			}
-    		}
-    	}*/
     	else if (i == snakeGame.snakeLength)
     	{
     		currentPoint[0][0] = relativeX*0.5;
@@ -333,95 +321,60 @@ static void drawSnake()
 			for(int k=0;k<3;k++)
 				lastPoint[i][k] = currentPoint[i][k];
     }
-    
-    /*for(int j = 5;j >= 1;j--)
-    {
-    	if( j == 5)
-    	{
-    		lastPoint[0][0] = 0;
-    		lastPoint[0][1] = -0.5;
-    		lastPoint[0][2] = -0.5*j + 0;
-    		continue;
-    	}
-    	else if( j == (5 - 1))
-    	{
-    		currentPoint[0][0] = -0.4;
-    		currentPoint[0][1] = -0.5;
-    		currentPoint[0][2] = -0.5*j;
-    		currentPoint[1][0] = +0.4;
-    		currentPoint[1][1] = -0.5;
-    		currentPoint[1][2] = -0.5*j;
-    		currentPoint[2][0] = 0;
-    		currentPoint[2][1] = -0.25;
-    		currentPoint[2][2] = -0.5*j;
-    		for(int i=0;i<3;i++)
-    		{
-    			OLEDFB3D_drawLine3D(lastPoint[0],currentPoint[i]);
-    		}
-    		for(int i=0;i<3;i++)
-    		{
-    			for(int k=0;k<i;k++)
-    			{
-    				OLEDFB3D_drawLine3D(currentPoint[i],currentPoint[k]);
-    			}
-    		}
-    	}
-    	else if(j==1)
-    	{
-    		currentPoint[0][0] = 0;
-    		currentPoint[0][1] = -0.5;
-    		currentPoint[0][2] = -0.5*j - 0.1;
-    		for(int i=0;i<3;i++)
-    		{
-    			OLEDFB3D_drawLine3D(currentPoint[0],lastPoint[i]);
-    		}
-    	}
-    	else
-    	{
-    		currentPoint[0][0] = -0.2;
-    		currentPoint[0][1] = -0.5;
-    		currentPoint[0][2] = -0.5*j;
-    		currentPoint[1][0] = +0.2;
-    		currentPoint[1][1] = -0.5;
-    		currentPoint[1][2] = -0.5*j;
-    		currentPoint[2][0] = 0;
-    		currentPoint[2][1] = -0.25;
-    		currentPoint[2][2] = -0.5*j;
-    		for(int i=0;i<3;i++)
-    		{
-    			OLEDFB3D_drawLine3D(lastPoint[i],currentPoint[i]);
-    		}
-    		for(int i=0;i<3;i++)
-    		{
-    			for(int k=0;k<i;k++)
-    			{
-    				OLEDFB3D_drawLine3D(currentPoint[i],currentPoint[k]);
-    			}
-    		}
-    	}
-		for(int i=0;i<3;i++)
-			for(int k=0;k<3;k++)
-				lastPoint[i][k] = currentPoint[i][k];
-    }*/
 }
 
-void Snake_onDrawHandler()
+static void paintHandler()
 {
-	drawTerrain(snakeGame.viewPortCenterX,snakeGame.viewPortCenterY);
+	drawTerrain();
 	drawSnake();
 }
 
-void Snake_onTimer()
+static void animationTimerHandler()
 {
-	
+	if(animationCounter < 100)
+	{
+		animationCounter++;
+	}
+	else
+	{
+		animationCounter = 0;
+		int newX = snakeGame.snakePositions[0][0];
+		int newY = snakeGame.snakePositions[0][1];
+		if(snakeDirection == SNAKE_DIRECTION_UP) newY--;
+		else if(snakeDirection == SNAKE_DIRECTION_DOWN) newY++;
+		else if(snakeDirection == SNAKE_DIRECTION_LEFT) newX--;
+		else if(snakeDirection == SNAKE_DIRECTION_RIGHT) newX++;
+		for(int i=snakeGame.snakeLength-1;i>=1;i--)
+		{
+			for(int j=0;j<2;j++)
+			{
+				snakeGame.snakePositions[i][j] = snakeGame.snakePositions[i - 1][j];
+			}
+		}
+		snakeGame.snakePositions[0][0] = newX;
+		snakeGame.snakePositions[0][1] = newY;
+		if(lastPressedKey == KEY_UP) snakeDirection = SNAKE_DIRECTION_UP;
+		else if(lastPressedKey == KEY_DOWN) snakeDirection = SNAKE_DIRECTION_DOWN;
+		else if(lastPressedKey == KEY_LEFT) snakeDirection = SNAKE_DIRECTION_LEFT;
+		else if(lastPressedKey == KEY_RIGHT) snakeDirection = SNAKE_DIRECTION_RIGHT;
+	}
 }
-
-void Snake_eventHandler(int event, int data)
+static void eventHandler(int event, int data)
 {
 	switch(event)
 	{
+	case EVENT_APP_INIT:
+		animationCounter = 0;
+		snakeDirection = SNAKE_DIRECTION_UP;
+		animationTimerId = Timer_set(10, animationTimerHandler);
+		Snake_init();
+		//setState(STATE_SPLASH);
+		break;
+	case EVENT_APP_QUIT:
+		Timer_unset(animationTimerId);
+		break;
 	case EVENT_KEY_DOWN:
-		if(data == KEY_DOWN && snakeGame.viewPortCenterY < 20-1)
+		/*if(data == KEY_DOWN && snakeGame.viewPortCenterY < 20-1)
 		{
 			snakeGame.viewPortCenterY++;
 		}
@@ -436,7 +389,8 @@ void Snake_eventHandler(int event, int data)
 		else if(data == KEY_LEFT && snakeGame.viewPortCenterX > 0)
 		{
 			snakeGame.viewPortCenterX--;
-		}
+		}*/
+		lastPressedKey = data;
 		break;
 	}
 }

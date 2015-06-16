@@ -8,12 +8,10 @@
 #ifndef SNAKELOGIC_H_
 #define SNAKELOGIC_H_
 
-void Snake_init();
-void Snake_onDrawHandler();
-void Snake_drawTerrain();
-void Snake_drawSnake();
-void Snake_eventHandler(int event, int data);
-void Snake_onTimer();
+#include "AppFramework.h"
 
+extern App Snake3D_theApp;
+
+void Snake3D_init();
 
 #endif /* SNAKELOGIC_H_ */

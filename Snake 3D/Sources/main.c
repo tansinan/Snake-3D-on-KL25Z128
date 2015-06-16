@@ -16,6 +16,7 @@
 #include "AppMusicGame.h"
 #include "Music.h"
 #include "MusicLibrary.h"
+#include "SnakeLogic.h"
 
 int counter = 0;
 int counter2 = 0;
@@ -39,6 +40,7 @@ int main(void)
 	Button_init();
 	Buzzer_init();
 	MusicLibrary_init();
+	Snake3D_init();
 	//Buzzer_set(880,50);
 	//Music_play(&MusicLibrary_rainbow, -1);
 	
@@ -53,15 +55,9 @@ int main(void)
 	Vec3D cameraPosition = {0, 2.0, 2.8};
 	Vec3D angle = {-25, 0, 0};
     //OLEDFB3D_projectPoint(vec1,vec2);
-	
-    Snake_init();
     AppReactionTime_init();
     AppMusicGame_init();
-    
-    App snakeApp;
-    App_create(&snakeApp, Snake_onDrawHandler, Snake_eventHandler);
-    
-    App_switchTo(&snakeApp);
+    App_switchTo(&Snake3D_theApp);
     
     
 	for(;;)
