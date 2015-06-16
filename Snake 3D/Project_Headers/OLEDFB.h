@@ -32,7 +32,7 @@ void OLEDFB_drawCharEx(uint8 x, uint8 y, uint8 charWidth, uint8 charHeight, cons
 void OLEDFB_drawText(uint8 x, uint8 y, const uchar* str);
 void OLEDFB_drawTextEx(uint8 x, uint8 y, uint8 charWidth, uint8 charHeight, const uchar* str);
 
-void OLEDFB_drawRect(int8 x1, int8 y1, int8 x2, int8 y2, uint8 mode);
+void OLEDFB_drawRect(int16 x1, int16 y1, int16 x2, int16 y2, uint16 mode);
 void OLEDFB_drawLine(int16 x1, int16 y1, int16 x2, int16 y2);
 void OLEDFB_drawCircle(int8 x, int8 y, int8 r, uint8 mode);
 

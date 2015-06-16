@@ -242,9 +242,9 @@ void OLEDFB_drawLine(int16 x1, int16 y1, int16 x2, int16 y2)
 	}
 }
 
-void OLEDFB_drawRect(int8 x1, int8 y1, int8 x2, int8 y2, uint8 mode)
+void OLEDFB_drawRect(int16 x1, int16 y1, int16 x2, int16 y2, uint16 mode)
 {
-	uint8 temp;
+	int16 temp;
     if(x1 > x2)
     {
     	temp = x1;
@@ -257,9 +257,9 @@ void OLEDFB_drawRect(int8 x1, int8 y1, int8 x2, int8 y2, uint8 mode)
     	y1 = y2;
     	y2 = temp;
     }
-	for(int8 i=x1;i<=x2;i++)
+	for(int16 i = x1;i<=x2;i++)
 	{
-		for(int8 j = y1;j<=y2;j++)
+		for(int16 j = y1;j<=y2;j++)
 		{
 			OLEDFB_drawPixel(i, j, mode);
 		}
