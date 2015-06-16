@@ -10,6 +10,7 @@
 #include "Button.h"
 #include "OLEDFB.h"
 #include "Timer.h"
+#include "MusicLibrary.h"
 
 #define STATE_SPLASH  0
 #define STATE_SELECT_MUSIC 1
@@ -37,6 +38,11 @@ static int8 speed = 10;
 static int8 correctKey = -1;
 static int8 pressedKey = -1;
 static uint8 mistakeFlag = 0;
+
+static Music* currentMusic;
+
+static int tuneCounter = 0;
+static int currentTune = 0;
 
 static struct
 {
@@ -187,7 +193,7 @@ static void paintHandler()
 			{
 				OLEDFB_drawTextEx(50,48,8,8,"MISS");
 			}
-			OLEDFB_drawRect(0,60,animationCounter*128/(speed*10),64,OLEDFB_INVERTED);
+			OLEDFB_drawRect(0,60,animationCounter*128/(currentMusic->duration[currentTune] * 20),64,OLEDFB_INVERTED);
 		}
 		case STATE_GAMEOVER:
 			break;
@@ -205,7 +211,7 @@ static void animationTimerHandler()
 		}
 		break;
 	case STATE_GAME:
-		if(animationCounter < 10 * speed)
+		/*if(animationCounter < 10 * speed)
 		{
 			animationCounter++;
 		}
@@ -220,7 +226,30 @@ static void animationTimerHandler()
 			animationCounter = 0;
 			correctKey = rand()%8;
 			pressedKey = -1;
+		}*/
+		if(animationCounter >= currentMusic->duration[currentTune] * 20)
+		{
+			animationCounter = 0;
+			currentTune++;
+			if(currentTune < currentMusic->length && currentMusic->tune[currentTune] >= 0)
+			{
+				Buzzer_set(frequencyTable[currentMusic->tune[currentTune]], 50);
+			}
+			else
+			{
+				Buzzer_set(10000,0);
+				setState(STATE_SPLASH);
+			}
+			if(pressedKey == -1)
+			{
+				playStat.missCount++;
+				mistakeFlag = 2;
+			}
+			else mistakeFlag = 3;
+			correctKey = rand()%8;
+			pressedKey = -1;
 		}
+		else animationCounter++;
 		break;
 	}
 }
@@ -269,6 +298,7 @@ static void setState(int _state)
 		animationCounter = 0;
 		break;
 	case STATE_GAME:
+		animationCounter = 0;
 		speed = 10;
 		pressedKey = -1;
 		correctKey = rand()%7;
@@ -276,19 +306,10 @@ static void setState(int _state)
 		playStat.correctCount = 0;
 		playStat.missCount = 0;
 		playStat.wrongCount = 0;
-		/*case STATE_READY:
-		animationCounter = 0;
-		break;
-	case STATE_COUNT_DOWN:
-		gameData.splashAnimationCounter = 0;
-		gameData.countDownNumber = 3;
-		break;
-	case STATE_GAME:
-		gameBeginTime = 0;
-		keyPressedTime = 0;
-		break;
-	case STATE_GAMEOVER:
-		break;*/
+		
+		currentMusic = &MusicLibrary_rainbow;
+		tuneCounter = currentTune = 0;
+		Buzzer_set(frequencyTable[currentMusic->tune[0]], 50);
 	}
 	state = _state;
 }
