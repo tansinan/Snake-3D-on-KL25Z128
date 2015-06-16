@@ -8,6 +8,8 @@
 #ifndef BUZZER_H_
 #define BUZZER_H_
 
+#include "Types.h"
+
 void Buzzer_init();
 void Buzzer_set(uint32 frequency, uint8 volume);
 
