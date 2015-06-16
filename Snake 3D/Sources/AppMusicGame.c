@@ -36,6 +36,8 @@ static uint16 animationCounter;
 static int8 speed = 10;
 static int8 correctKey = -1;
 static int8 pressedKey = -1;
+static uint8 mistakeFlag = 0;
+
 static struct
 {
 	uint16 correctCount;
@@ -100,49 +102,49 @@ static void paintHandler()
 		{
 			const char keyToChar[] = {'U','D','L','R','A','B','C','D'};
 			
-			/*if(correctKey!=-1)
+			if(pressedKey!=-1)
 			{
 				if(correctKey == pressedKey)
 				{
-					OLEDFB_drawCharEx(32,0,64,64,keyToChar[correctKey]);
+					OLEDFB_drawCharEx(64,4,12,12,keyToChar[correctKey]);
 				}
 				else
 				{
-					OLEDFB_drawCharEx(32,0,64,64,'X');
+					OLEDFB_drawCharEx(64,4,12,12,'X');
 				}
-			}*/
+			}
 			
 			int size = animationCounter % 10 <= 5 ?
 					(animationCounter % 10 + 3) : ((10 - animationCounter% 10) + 3);
-			if(correctKey == KEY_LEFT)
+			if(correctKey == KEY_LEFT && pressedKey==-1)
 			{
 				OLEDFB_drawCharEx(12, 22, 20, 20, 'L');
 				OLEDFB_drawRect(12, 22, 32, 42, OLEDFB_INVERTED);
 			}
 			else OLEDFB_drawRect(12+size, 22+size, 32-size, 42-size, OLEDFB_INVERTED);
 			
-			if(correctKey == KEY_RIGHT)
+			if(correctKey == KEY_RIGHT && pressedKey==-1)
 			{
 				OLEDFB_drawCharEx(32, 22, 20, 20, 'R');
 				OLEDFB_drawRect(32, 22, 52, 42, OLEDFB_INVERTED);
 			}
 			else OLEDFB_drawRect(32 + size, 22 + size, 52 - size, 42 - size, OLEDFB_INVERTED);
 			
-			if(correctKey == KEY_UP)
+			if(correctKey == KEY_UP && pressedKey==-1)
 			{
 				OLEDFB_drawCharEx(22, 2, 20, 20, 'U');
 				OLEDFB_drawRect(22, 2, 42, 22, OLEDFB_INVERTED);
 			}
 			else OLEDFB_drawRect(22 + size, 2 + size, 42 - size, 22 - size, OLEDFB_INVERTED);
 			
-			if(correctKey == KEY_DOWN)
+			if(correctKey == KEY_DOWN && pressedKey==-1)
 			{
 				OLEDFB_drawCharEx(22, 42, 20, 20, 'D');
 				OLEDFB_drawRect(22, 42, 42, 62, OLEDFB_INVERTED);
 			}
 			else OLEDFB_drawRect(22 + size, 42 + size, 42 - size, 62 - size, OLEDFB_INVERTED);
 			
-			if(correctKey == KEY_A)
+			if(correctKey == KEY_A && pressedKey==-1)
 			{
 				OLEDFB_drawCharEx(76, 12, 20, 20, 'A');
 				OLEDFB_drawCircle(86,22,10,OLEDFB_INVERTED);
@@ -152,9 +154,9 @@ static void paintHandler()
 				OLEDFB_drawCircle(86,22,size,OLEDFB_INVERTED);
 			}
 			
-			if(correctKey == KEY_B)
+			if(correctKey == KEY_C && pressedKey==-1)
 			{
-				OLEDFB_drawCharEx(76, 34, 20, 20, 'B');
+				OLEDFB_drawCharEx(76, 34, 20, 20, 'C');
 				OLEDFB_drawCircle(86,44,10,OLEDFB_INVERTED);
 			}
 			else
@@ -162,9 +164,9 @@ static void paintHandler()
 				OLEDFB_drawCircle(86,44,size,OLEDFB_INVERTED);
 			}
 			
-			if(correctKey == KEY_C)
+			if(correctKey == KEY_B && pressedKey==-1)
 			{
-				OLEDFB_drawCharEx(96, 12, 20, 20, 'C');
+				OLEDFB_drawCharEx(96, 12, 20, 20, 'B');
 				OLEDFB_drawCircle(106,22,10,OLEDFB_INVERTED);
 			}
 			else
@@ -172,7 +174,7 @@ static void paintHandler()
 				OLEDFB_drawCircle(106,22,size,OLEDFB_INVERTED);
 			}
 			
-			if(correctKey == KEY_D)
+			if(correctKey == KEY_D && pressedKey==-1)
 			{
 				OLEDFB_drawCharEx(96, 34, 20, 20, 'D');
 				OLEDFB_drawCircle(106,44,10,OLEDFB_INVERTED);
@@ -180,8 +182,15 @@ static void paintHandler()
 			else
 			{
 				OLEDFB_drawCircle(106,44,size,OLEDFB_INVERTED);
-			}			
+			}
+			if(mistakeFlag == 2)
+			{
+				OLEDFB_drawTextEx(50,48,8,8,"MISS");
+			}
+			OLEDFB_drawRect(0,60,animationCounter*128/(speed*10),64,OLEDFB_INVERTED);
 		}
+		case STATE_GAMEOVER:
+			break;
 	}
 }
 
@@ -205,11 +214,12 @@ static void animationTimerHandler()
 			if(pressedKey == -1)
 			{
 				playStat.missCount++;
+				mistakeFlag = 2;
 			}
+			else mistakeFlag = 3;
 			animationCounter = 0;
 			correctKey = rand()%8;
 			pressedKey = -1;
-			//TODO: flag Last Miss
 		}
 		break;
 	}
@@ -238,10 +248,12 @@ static void eventHandler(int event, int data)
 			if(pressedKey == correctKey)
 			{
 				playStat.correctCount++;
+				mistakeFlag = 0;
 			}
 			else
 			{
 				playStat.wrongCount++;
+				mistakeFlag = 1;
 			}
 			break;
 		}
@@ -260,6 +272,7 @@ static void setState(int _state)
 		speed = 10;
 		pressedKey = -1;
 		correctKey = rand()%7;
+		mistakeFlag = 3;
 		playStat.correctCount = 0;
 		playStat.missCount = 0;
 		playStat.wrongCount = 0;
