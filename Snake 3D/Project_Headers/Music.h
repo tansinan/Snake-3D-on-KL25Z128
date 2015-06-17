@@ -15,6 +15,7 @@ typedef struct
 	const char* tune;
 	const char* duration;
 	int length;
+	const char* name;
 } Music;
 
 void Music_play(Music* music, int loop);
