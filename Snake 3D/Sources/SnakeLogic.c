@@ -11,7 +11,13 @@
 #include "Timer.h"
 #include "Button.h"
 
+#define STATE_SPLASH 0
+#define STATE_GAME 1
+#define STATE_GAMEOVER 2
+
 App Snake3D_theApp;
+
+static int state = STATE_SPLASH;
 
 const uint8 MAP_NORMAL = 0;
 const uint8 MAP_FOOD = 1;
@@ -25,6 +31,8 @@ const uint8 SNAKE_DIRECTION_RIGHT = 3;
 
 static uint8 animationTimerId;
 
+static uint16 score = 0;
+
 static uint16 animationCounter;
 
 static void animationTimerHandler();
@@ -35,6 +43,7 @@ void Snake3D_init();
 static void Snake_init();
 static void paintHandler();
 static void eventHandler(int event, int data);
+static void setState(int _state);
 
 struct Snake_Game
 {
@@ -83,41 +92,17 @@ static void Snake_init()
 			else
 			{
 				int rnd = rand();
-				if(rnd%10==0) snakeGame.map[i][j] = MAP_WALL_HARD;
-				else if(rnd%10 == 1) snakeGame.map[i][j] = MAP_FOOD;
+				if(rnd%10==0 && i!=7) snakeGame.map[i][j] = MAP_WALL_HARD;
+				else if(rnd%10 == 1 && i!=7) snakeGame.map[i][j] = MAP_FOOD;
 				else snakeGame.map[i][j] = MAP_NORMAL;
 			}
 		}
 	}
 	for(int i=0;i<3;i++)
 	{
-		snakeGame.snakePositions[i][0] = 5;
-		snakeGame.snakePositions[i][1] = 5 + i;
+		snakeGame.snakePositions[i][0] = 7;
+		snakeGame.snakePositions[i][1] = 7 + i;
 	}
-	/*snakeGame.snakePositions[0][0] = 5;
-	snakeGame.snakePositions[0][1] = 5;
-	snakeGame.snakePositions[1][0] = 5;
-	snakeGame.snakePositions[1][1] = 6;
-	snakeGame.snakePositions[2][0] = 6;
-	snakeGame.snakePositions[2][1] = 6;
-	snakeGame.snakePositions[3][0] = 6;
-	snakeGame.snakePositions[3][1] = 5;
-	snakeGame.snakePositions[4][0] = 6;
-	snakeGame.snakePositions[4][1] = 4;
-	snakeGame.snakePositions[5][0] = 5;
-	snakeGame.snakePositions[5][1] = 4;
-	snakeGame.snakePositions[6][0] = 4;
-	snakeGame.snakePositions[6][1] = 4;
-	snakeGame.snakePositions[7][0] = 4;
-	snakeGame.snakePositions[7][1] = 5;
-	snakeGame.snakePositions[8][0] = 4;
-	snakeGame.snakePositions[8][1] = 6;*/
-	/*for(int i=0;i<9;i++)
-	{
-		snakeGame.snakePositions[i][0] = 10 - snakeGame.snakePositions[i][0];
-	}*/
-	/*snakeGame.snakePositions[4][0] = 6;
-	snakeGame.snakePositions[4][1] = 4;*/
 	snakeGame.snakeLength = 3;
 }
 
@@ -216,15 +201,6 @@ static void drawTerrain()
 			{
 				Quad3D quad;
 				for(int i=0;i<4;i++) quad[i][1] = -0.5;
-				/*quad[0][0] = (i - centerX)/2.0 - 0.25;
-				quad[0][2] = (j - centerY)/2.0 - 1.5;
-				quad[2][0] = (i - centerX)/2.0 + 0.25;
-				quad[2][2] = (j + 1 - centerY)/2.0 - 1.5;
-				quad[1][0] = (i - centerX)/2.0 - 0.25;
-				quad[1][2] = (j + 1 - centerY)/2.0 - 1.5;
-				quad[3][0] = (i - centerX)/2.0 + 0.25;
-				quad[3][2] = (j - centerY)/2.0 - 1.5;*/
-				
 				quad[0][0] = (i - centerX)/2.0 - 0.25;
 				quad[0][2] = (j - centerY + 0.5)/2.0 - 1.5;
 				quad[1][0] = (i - centerX)/2.0;
@@ -365,88 +341,145 @@ static void drawSnake()
 }
 
 static void paintHandler()
-{
-	drawTerrain();
-	drawSnake();
+{	
+	switch(state)
+	{
+	case STATE_SPLASH:
+		OLEDFB_drawTextEx(5,5,24,24, "Snake");
+		OLEDFB_drawTextEx(100,29,12,12, "3D");
+		OLEDFB_drawTextEx(0,45,8,8, "ANYKEY->CONTINUE");
+		break;
+	case STATE_GAME:
+		drawTerrain();
+		drawSnake();
+		break;
+	case STATE_GAMEOVER:
+		{
+			char temp[20];
+			sprintf(temp,"Score:%d",score);
+			OLEDFB_drawTextEx(5,5,12,12, "GameOver");
+			for(int i=0;i<8;i++)
+			{
+				if(i>=2)
+				{
+					OLEDFB_drawLine(16*i,20,16*i,28);
+					OLEDFB_drawLine(16*(i-1),28,16*i,28);
+					OLEDFB_drawLine(16*(i-1),20,16*i,20);
+				}
+				else if(i==1)
+				{
+					OLEDFB_drawLine(16*(i-1),24,16*i - 8,18);
+					OLEDFB_drawLine(16*(i-1),24,16*i - 8,30);
+					OLEDFB_drawLine(16*i - 8,18,16*i,20);
+					OLEDFB_drawLine(16*i - 8,30,16*i,28);
+				}
+			}
+			OLEDFB_drawTextEx(20,40,8,8,temp);
+		}
+		break;
+	}
 }
 
 static void animationTimerHandler()
 {
-	if(animationCounter < 100)
+	if(state == STATE_SPLASH || state ==  STATE_GAMEOVER)
 	{
-		animationCounter++;
+		if(animationCounter < 100) animationCounter++;
 	}
-	else
+	else if(state == STATE_GAME)
 	{
-		if(lastPressedKey == KEY_UP) snakeDirection = SNAKE_DIRECTION_UP;
-		else if(lastPressedKey == KEY_DOWN) snakeDirection = SNAKE_DIRECTION_DOWN;
-		else if(lastPressedKey == KEY_LEFT) snakeDirection = SNAKE_DIRECTION_LEFT;
-		else if(lastPressedKey == KEY_RIGHT) snakeDirection = SNAKE_DIRECTION_RIGHT;
-		animationCounter = 0;
-		int newX = snakeGame.snakePositions[0][0];
-		int newY = snakeGame.snakePositions[0][1];
-		if(snakeDirection == SNAKE_DIRECTION_UP) newY--;
-		else if(snakeDirection == SNAKE_DIRECTION_DOWN) newY++;
-		else if(snakeDirection == SNAKE_DIRECTION_LEFT) newX--;
-		else if(snakeDirection == SNAKE_DIRECTION_RIGHT) newX++;
-		for(int i=snakeGame.snakeLength;i>=1;i--)
+		if(animationCounter < 100)
 		{
-			for(int j=0;j<2;j++)
+			animationCounter++;
+		}
+		else
+		{
+			if(lastPressedKey == KEY_UP) snakeDirection = SNAKE_DIRECTION_UP;
+			else if(lastPressedKey == KEY_DOWN) snakeDirection = SNAKE_DIRECTION_DOWN;
+			else if(lastPressedKey == KEY_LEFT) snakeDirection = SNAKE_DIRECTION_LEFT;
+			else if(lastPressedKey == KEY_RIGHT) snakeDirection = SNAKE_DIRECTION_RIGHT;
+			animationCounter = 0;
+			int newX = snakeGame.snakePositions[0][0];
+			int newY = snakeGame.snakePositions[0][1];
+			if(snakeDirection == SNAKE_DIRECTION_UP) newY--;
+			else if(snakeDirection == SNAKE_DIRECTION_DOWN) newY++;
+			else if(snakeDirection == SNAKE_DIRECTION_LEFT) newX--;
+			else if(snakeDirection == SNAKE_DIRECTION_RIGHT) newX++;
+			for(int i=snakeGame.snakeLength;i>=1;i--)
 			{
-				snakeGame.snakePositions[i][j] = snakeGame.snakePositions[i - 1][j];
+				for(int j=0;j<2;j++)
+				{
+					snakeGame.snakePositions[i][j] = snakeGame.snakePositions[i - 1][j];
+				}
 			}
+			snakeGame.snakePositions[0][0] = newX;
+			snakeGame.snakePositions[0][1] = newY;
+			if(snakeGame.map[newX][newY] == MAP_FOOD)
+			{
+				snakeGame.map[newX][newY] == MAP_NORMAL;
+				snakeGame.snakeLength++;
+				score++;
+				if(snakeGame.snakeLength > 20) snakeGame.snakeLength = 20;
+			}
+			else if(snakeGame.map[newX][newY] == MAP_WALL_HARD)
+			{
+				setState(STATE_GAMEOVER);
+			}
+			lastPressedKey = -1;
 		}
-		snakeGame.snakePositions[0][0] = newX;
-		snakeGame.snakePositions[0][1] = newY;
-		if(snakeGame.map[newX][newY] == MAP_FOOD)
-		{
-			snakeGame.snakeLength++;
-			if(snakeGame.snakeLength > 20) snakeGame.snakeLength = 20;
-		}
-		else if(snakeGame.map[newX][newY] == MAP_WALL_HARD)
-		{
-			//TODO : Game Over Handler
-			snakeGame.snakeLength = 3;
-		}
-		lastPressedKey = -1;
 	}
 }
+
 static void eventHandler(int event, int data)
 {
 	switch(event)
 	{
 	case EVENT_APP_INIT:
-		animationCounter = 0;
-		snakeDirection = SNAKE_DIRECTION_UP;
 		animationTimerId = Timer_set(10, animationTimerHandler);
-		Snake_init();
-		//setState(STATE_SPLASH);
+		setState(STATE_SPLASH);
 		break;
 	case EVENT_APP_QUIT:
 		Timer_unset(animationTimerId);
 		break;
 	case EVENT_KEY_DOWN:
-		/*if(data == KEY_DOWN && snakeGame.viewPortCenterY < 20-1)
+		if(state == STATE_SPLASH)
 		{
-			snakeGame.viewPortCenterY++;
+			setState(STATE_GAME);
 		}
-		else if(data == KEY_UP && snakeGame.viewPortCenterY > 0)
+		else if(state == STATE_GAME)
 		{
-			snakeGame.viewPortCenterY--;
+			if(lastPressedKey == -1) lastPressedKey = data;
+			if(lastPressedKey == KEY_UP && snakeDirection == SNAKE_DIRECTION_DOWN) lastPressedKey = -1;
+			if(lastPressedKey == KEY_DOWN && snakeDirection == SNAKE_DIRECTION_UP) lastPressedKey = -1;
+			if(lastPressedKey == KEY_LEFT && snakeDirection == SNAKE_DIRECTION_RIGHT) lastPressedKey = -1;
+			if(lastPressedKey == KEY_RIGHT && snakeDirection == SNAKE_DIRECTION_LEFT) lastPressedKey = -1;
 		}
-		else if(data == KEY_RIGHT && snakeGame.viewPortCenterX < 20-1)
+		else  if(state == STATE_GAMEOVER)
 		{
-			snakeGame.viewPortCenterX++;
+			setState(STATE_SPLASH);
 		}
-		else if(data == KEY_LEFT && snakeGame.viewPortCenterX > 0)
-		{
-			snakeGame.viewPortCenterX--;
-		}*/
-		if(lastPressedKey == -1) lastPressedKey = data;
-		if(lastPressedKey == KEY_UP && snakeDirection == SNAKE_DIRECTION_DOWN) lastPressedKey = -1;
-		if(lastPressedKey == KEY_DOWN && snakeDirection == SNAKE_DIRECTION_UP) lastPressedKey = -1;
-		if(lastPressedKey == KEY_LEFT && snakeDirection == SNAKE_DIRECTION_RIGHT) lastPressedKey = -1;
-		if(lastPressedKey == KEY_RIGHT && snakeDirection == SNAKE_DIRECTION_LEFT) lastPressedKey = -1;
 		break;
 	}
+}
+
+static void setState(int _state)
+{
+	switch(_state)
+	{
+	case STATE_SPLASH:
+		animationCounter = 0;
+		break;
+	case STATE_GAME:
+		score = 0;
+		animationCounter = 0;
+		snakeDirection = SNAKE_DIRECTION_UP;
+		Snake_init();
+		break;
+	case STATE_GAMEOVER:
+		{
+			animationCounter = 0;
+			break;
+		}
+	}
+	state = _state;
 }
