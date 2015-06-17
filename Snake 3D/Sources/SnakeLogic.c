@@ -40,11 +40,8 @@ struct Snake_Game
 {
 	uint8 map[20][20];
 	//[0] => head ||  [1] => body closest to head;
-	uint8 snakePositions[20][2];
-	uint8 snakeHead;
+	uint8 snakePositions[25][2];
 	uint8 snakeLength;
-	uint8 viewPortCenterX;
-	uint8 viewPortCenterY;
 } snakeGame;
 
 static int8 lastPressedKey = -1;
@@ -92,8 +89,7 @@ static void Snake_init()
 			}
 		}
 	}
-	snakeGame.snakeHead = 0;
-	for(int i=0;i<6;i++)
+	for(int i=0;i<3;i++)
 	{
 		snakeGame.snakePositions[i][0] = 5;
 		snakeGame.snakePositions[i][1] = 5 + i;
@@ -122,9 +118,7 @@ static void Snake_init()
 	}*/
 	/*snakeGame.snakePositions[4][0] = 6;
 	snakeGame.snakePositions[4][1] = 4;*/
-	snakeGame.snakeLength = 6;
-	snakeGame.viewPortCenterX = 3;
-	snakeGame.viewPortCenterY = 3;
+	snakeGame.snakeLength = 3;
 }
 
 static void drawTerrain()
@@ -217,6 +211,29 @@ static void drawTerrain()
 					temp[1] = -0.5; 
 					OLEDFB3D_drawLine3D(quad[i],temp);
 				}
+			}
+			else if (snakeGame.map[i][j] == MAP_FOOD)
+			{
+				Quad3D quad;
+				for(int i=0;i<4;i++) quad[i][1] = -0.5;
+				/*quad[0][0] = (i - centerX)/2.0 - 0.25;
+				quad[0][2] = (j - centerY)/2.0 - 1.5;
+				quad[2][0] = (i - centerX)/2.0 + 0.25;
+				quad[2][2] = (j + 1 - centerY)/2.0 - 1.5;
+				quad[1][0] = (i - centerX)/2.0 - 0.25;
+				quad[1][2] = (j + 1 - centerY)/2.0 - 1.5;
+				quad[3][0] = (i - centerX)/2.0 + 0.25;
+				quad[3][2] = (j - centerY)/2.0 - 1.5;*/
+				
+				quad[0][0] = (i - centerX)/2.0 - 0.25;
+				quad[0][2] = (j - centerY + 0.5)/2.0 - 1.5;
+				quad[1][0] = (i - centerX)/2.0;
+				quad[1][2] = (j + 1 - centerY)/2.0 - 1.5;
+				quad[2][0] = (i - centerX)/2.0 + 0.25;
+				quad[2][2] = (j + 0.5 - centerY)/2.0 - 1.5;
+				quad[3][0] = (i - centerX)/2.0;
+				quad[3][2] = (j - centerY)/2.0 - 1.5;
+				OLEDFB3D_drawQuad3D(quad);
 			}
 		}
 	}
@@ -372,7 +389,7 @@ static void animationTimerHandler()
 		else if(snakeDirection == SNAKE_DIRECTION_DOWN) newY++;
 		else if(snakeDirection == SNAKE_DIRECTION_LEFT) newX--;
 		else if(snakeDirection == SNAKE_DIRECTION_RIGHT) newX++;
-		for(int i=snakeGame.snakeLength-1;i>=1;i--)
+		for(int i=snakeGame.snakeLength;i>=1;i--)
 		{
 			for(int j=0;j<2;j++)
 			{
@@ -381,6 +398,17 @@ static void animationTimerHandler()
 		}
 		snakeGame.snakePositions[0][0] = newX;
 		snakeGame.snakePositions[0][1] = newY;
+		if(snakeGame.map[newX][newY] == MAP_FOOD)
+		{
+			snakeGame.snakeLength++;
+			if(snakeGame.snakeLength > 20) snakeGame.snakeLength = 20;
+		}
+		else if(snakeGame.map[newX][newY] == MAP_WALL_HARD)
+		{
+			//TODO : Game Over Handler
+			snakeGame.snakeLength = 3;
+		}
+		lastPressedKey = -1;
 	}
 }
 static void eventHandler(int event, int data)
@@ -414,7 +442,11 @@ static void eventHandler(int event, int data)
 		{
 			snakeGame.viewPortCenterX--;
 		}*/
-		lastPressedKey = data;
+		if(lastPressedKey == -1) lastPressedKey = data;
+		if(lastPressedKey == KEY_UP && snakeDirection == SNAKE_DIRECTION_DOWN) lastPressedKey = -1;
+		if(lastPressedKey == KEY_DOWN && snakeDirection == SNAKE_DIRECTION_UP) lastPressedKey = -1;
+		if(lastPressedKey == KEY_LEFT && snakeDirection == SNAKE_DIRECTION_RIGHT) lastPressedKey = -1;
+		if(lastPressedKey == KEY_RIGHT && snakeDirection == SNAKE_DIRECTION_LEFT) lastPressedKey = -1;
 		break;
 	}
 }
