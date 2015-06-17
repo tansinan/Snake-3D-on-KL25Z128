@@ -180,7 +180,7 @@ void OLEDFB3D_drawLine3D(Vec3D point1, Vec3D point2)
 		-rel2[0] / rel2[2] * focalLength + 64,
 		16 + rel2[1] / rel2[2] * focalLength
 	};
-	OLEDFB_drawLine(point2D1[0],point2D1[1],point2D2[0],point2D2[1]);
+	OLEDFB_drawLine(round(point2D1[0]),round(point2D1[1]),round(point2D2[0]),round(point2D2[1]));
 }
 
 void OLEDFB3D_drawQuad2D(Quad2D quad2D)
