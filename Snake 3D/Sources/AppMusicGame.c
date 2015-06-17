@@ -14,9 +14,8 @@
 
 #define STATE_SPLASH  0
 #define STATE_SELECT_MUSIC 1
-#define STATE_COUNT_DOWN 2
-#define STATE_GAME 3
-#define STATE_GAMEOVER 4
+#define STATE_GAME 2
+#define STATE_GAMEOVER 3
 
 App AppMusicGame_theApp;
 
@@ -33,6 +32,10 @@ static uint8 state;
 static uint8 animationTimerId;
 
 static uint16 animationCounter;
+
+static Music* allMusic[3] = {&MusicLibrary_rainbow, &MusicLibrary_test1, &MusicLibrary_test2};
+const static int musicCount = 3;
+static int selectedMusic = 0;
 
 static int8 speed = 10;
 static int8 correctKey = -1;
@@ -96,12 +99,31 @@ static void paintHandler()
 		}
 		else
 		{
-			OLEDFB_drawText(4, 45, "ANYKEY=CONTINUE");
 			OLEDFB_drawRect(50,0,100,10, OLEDFB_INVERTED);
 			OLEDFB_drawRect(50,50,60,10,OLEDFB_INVERTED);
 			OLEDFB_drawRect(90,50,100,10,OLEDFB_INVERTED);
 			OLEDFB_drawCircle(50,50,10,OLEDFB_WHITE);
 			OLEDFB_drawCircle(90,50,10,OLEDFB_WHITE);
+			OLEDFB_drawText(4, 45, "ANYKEY=CONTINUE");
+		}
+		break;
+	case STATE_SELECT_MUSIC:
+		OLEDFB_drawTextEx(10, 0, 16, 16, "Choose");
+		for(int i=0,y=16;i<3;i++)
+		{
+			char temp[20];
+			sprintf(temp,"%d.%s",i+1,allMusic[i]->name);
+			if(i==selectedMusic)
+			{
+				OLEDFB_drawTextEx(0,y,12,12, temp);
+				y+=12;
+			}
+			else
+			{
+				OLEDFB_drawTextEx(0,y,8,8, temp);
+				y+=8;
+			}
+			y+=2;
 		}
 		break;
 	case STATE_GAME:
@@ -195,8 +217,20 @@ static void paintHandler()
 			}
 			OLEDFB_drawRect(0,60,animationCounter*128/(currentMusic->duration[currentTune] * 20),64,OLEDFB_INVERTED);
 		}
-		case STATE_GAMEOVER:
+		break;
+	case STATE_GAMEOVER:
+		{
+			OLEDFB_drawTextEx(0, 0, 16, 16, "GameOver");
+			char temp[20];
+			sprintf(temp,"Correct:%d", playStat.correctCount);
+			OLEDFB_drawTextEx(10, 21, 10, 10, temp);
+			sprintf(temp,"Wrong:%d", playStat.wrongCount);
+			OLEDFB_drawTextEx(10, 31, 10, 10, temp);
+			sprintf(temp,"Miss:%d", playStat.missCount);
+			OLEDFB_drawTextEx(10, 41, 10, 10, temp);
+			OLEDFB_drawText(10, 54, "A=replay D=exit");
 			break;
+		}
 	}
 }
 
@@ -211,22 +245,6 @@ static void animationTimerHandler()
 		}
 		break;
 	case STATE_GAME:
-		/*if(animationCounter < 10 * speed)
-		{
-			animationCounter++;
-		}
-		else
-		{
-			if(pressedKey == -1)
-			{
-				playStat.missCount++;
-				mistakeFlag = 2;
-			}
-			else mistakeFlag = 3;
-			animationCounter = 0;
-			correctKey = rand()%8;
-			pressedKey = -1;
-		}*/
 		if(animationCounter >= currentMusic->duration[currentTune] * 20)
 		{
 			animationCounter = 0;
@@ -237,8 +255,8 @@ static void animationTimerHandler()
 			}
 			else
 			{
-				Buzzer_set(10000,0);
-				setState(STATE_SPLASH);
+				Buzzer_set(0,0);
+				setState(STATE_GAMEOVER);
 			}
 			if(pressedKey == -1)
 			{
@@ -269,7 +287,22 @@ static void eventHandler(int event, int data)
 		switch(state)
 		{
 		case STATE_SPLASH:
-			setState(STATE_GAME);
+			setState(STATE_SELECT_MUSIC);
+			break;
+		case STATE_SELECT_MUSIC:
+			if(data == KEY_UP)
+			{
+				if(selectedMusic >0 ) selectedMusic--;
+			}
+			else if(data == KEY_DOWN)
+			{
+				if(selectedMusic < 2) selectedMusic++;
+			}
+			else if(data == KEY_RIGHT)
+			{
+				currentMusic = allMusic[selectedMusic];
+				setState(STATE_GAME);
+			}
 			break;
 		case STATE_GAME:
 			if(pressedKey!=-1) break;
@@ -285,6 +318,12 @@ static void eventHandler(int event, int data)
 				mistakeFlag = 1;
 			}
 			break;
+		case STATE_GAMEOVER:
+			if(data == KEY_A)
+			{
+				setState(STATE_SELECT_MUSIC);
+			}
+			break;
 		}
 		break;
 	}
@@ -297,6 +336,9 @@ static void setState(int _state)
 	case STATE_SPLASH:
 		animationCounter = 0;
 		break;
+	case STATE_SELECT_MUSIC:
+		animationCounter = 0;
+		break;
 	case STATE_GAME:
 		animationCounter = 0;
 		speed = 10;
@@ -306,10 +348,13 @@ static void setState(int _state)
 		playStat.correctCount = 0;
 		playStat.missCount = 0;
 		playStat.wrongCount = 0;
-		
-		currentMusic = &MusicLibrary_rainbow;
+		//currentMusic = &MusicLibrary_rainbow;
 		tuneCounter = currentTune = 0;
 		Buzzer_set(frequencyTable[currentMusic->tune[0]], 50);
+		break;
+	case STATE_GAMEOVER:
+		animationCounter = 0;
+		break;
 	}
 	state = _state;
 }
