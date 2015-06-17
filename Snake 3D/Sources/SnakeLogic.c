@@ -93,7 +93,7 @@ static void Snake_init()
 		}
 	}
 	snakeGame.snakeHead = 0;
-	for(int i=0;i<3;i++)
+	for(int i=0;i<6;i++)
 	{
 		snakeGame.snakePositions[i][0] = 5;
 		snakeGame.snakePositions[i][1] = 5 + i;
@@ -122,7 +122,7 @@ static void Snake_init()
 	}*/
 	/*snakeGame.snakePositions[4][0] = 6;
 	snakeGame.snakePositions[4][1] = 4;*/
-	snakeGame.snakeLength = 3;
+	snakeGame.snakeLength = 6;
 	snakeGame.viewPortCenterX = 3;
 	snakeGame.viewPortCenterY = 3;
 }
@@ -140,19 +140,23 @@ static void drawTerrain()
 	
 	if(snakeDirection == SNAKE_DIRECTION_UP)
 	{
-		centerY -= animationCounter /100.0*0.5;
+		centerY +=1;
+		centerY -= animationCounter /100.0;
 	}
 	else if(snakeDirection == SNAKE_DIRECTION_DOWN)
 	{
-		centerY += animationCounter /100.0*0.5;
+		centerY -=1;
+		centerY += animationCounter /100.0;
 	}
 	else if(snakeDirection == SNAKE_DIRECTION_LEFT)
 	{
-		centerX -= animationCounter /100.0*0.5;
+		centerX +=1;
+		centerX -= animationCounter /100.0;
 	}
 	else if(snakeDirection == SNAKE_DIRECTION_RIGHT)
 	{
-		centerX += animationCounter /100.0*0.5;
+		centerX -= 1;
+		centerX += animationCounter /100.0;
 	}
 	
 	int paintRegionX1 = centerX - 4;
@@ -225,13 +229,33 @@ static void drawSnake()
     Vec3D lastPoint[3];
     Vec3D currentPoint[3];
     
-	int relativeX,relativeY;
+	float relativeX,relativeY;
     for(int i=0;i<= snakeGame.snakeLength;i++)
     {
     	if( i != snakeGame.snakeLength)
     	{
     		relativeX = snakeGame.snakePositions[i][0] - snakeGame.snakePositions[0][0];
     		relativeY = snakeGame.snakePositions[i][1] - snakeGame.snakePositions[0][1];
+    	}
+    	if(snakeDirection == SNAKE_DIRECTION_UP)
+    	{
+    		relativeY -= 1;
+    		relativeY += animationCounter /100.0;
+    	}
+    	else if(snakeDirection == SNAKE_DIRECTION_DOWN)
+    	{
+    		relativeY +=1;
+    		relativeY -= animationCounter /100.0;
+    	}
+    	else if(snakeDirection == SNAKE_DIRECTION_LEFT)
+    	{
+    		relativeX -= 1;
+    		relativeX += animationCounter /100.0;
+    	}
+    	else if(snakeDirection == SNAKE_DIRECTION_RIGHT)
+    	{
+    		relativeX += 1;
+    		relativeX -= animationCounter /100.0;
     	}
 		int relPos = i > 0 ? relativePosition(snakeGame.snakePositions[i-1][0],
 				snakeGame.snakePositions[i-1][1],
@@ -337,6 +361,10 @@ static void animationTimerHandler()
 	}
 	else
 	{
+		if(lastPressedKey == KEY_UP) snakeDirection = SNAKE_DIRECTION_UP;
+		else if(lastPressedKey == KEY_DOWN) snakeDirection = SNAKE_DIRECTION_DOWN;
+		else if(lastPressedKey == KEY_LEFT) snakeDirection = SNAKE_DIRECTION_LEFT;
+		else if(lastPressedKey == KEY_RIGHT) snakeDirection = SNAKE_DIRECTION_RIGHT;
 		animationCounter = 0;
 		int newX = snakeGame.snakePositions[0][0];
 		int newY = snakeGame.snakePositions[0][1];
@@ -353,10 +381,6 @@ static void animationTimerHandler()
 		}
 		snakeGame.snakePositions[0][0] = newX;
 		snakeGame.snakePositions[0][1] = newY;
-		if(lastPressedKey == KEY_UP) snakeDirection = SNAKE_DIRECTION_UP;
-		else if(lastPressedKey == KEY_DOWN) snakeDirection = SNAKE_DIRECTION_DOWN;
-		else if(lastPressedKey == KEY_LEFT) snakeDirection = SNAKE_DIRECTION_LEFT;
-		else if(lastPressedKey == KEY_RIGHT) snakeDirection = SNAKE_DIRECTION_RIGHT;
 	}
 }
 static void eventHandler(int event, int data)
