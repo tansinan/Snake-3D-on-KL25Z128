@@ -118,24 +118,37 @@ static void paintHandler()
 		{
 			char temp[30];
 			int duration = keyPressedTime - gameBeginTime;
-			OLEDFB_drawTextEx(4,4, 16,16, "SCORE:");
+			OLEDFB_drawTextEx(4,4, 16,16, "TIME:");
 			sprintf(temp, "%d.%d%d%d", duration/1000, (duration/100)%10, (duration/10)%10, duration%10);
-			OLEDFB_drawTextEx(20,20, 16,16, temp);
-			if(duration < historyBest)
+			if(keyPressedTime!=0)
 			{
-				OLEDFB_drawText(20,48,"New Record!");
+				OLEDFB_drawTextEx(20,20, 16,16, temp);
+				if(duration < historyBest)
+				{
+					OLEDFB_drawText(20,48,"New Record!");
+				}
+				else
+				{
+					sprintf(temp, "History Best:");
+					OLEDFB_drawText(20,48,temp);
+					sprintf(temp, "%d.%d%d%d", historyBest/1000, (historyBest/100)%10, (historyBest/10)%10, historyBest%10);
+					OLEDFB_drawText(28,56,temp);
+				}
 			}
 			else
 			{
-				sprintf(temp, "History Best:");
+				OLEDFB_drawTextEx(4,4, 16,16, "TIME:");
+				OLEDFB_drawTextEx(20,20, 16,16, "+INF...");
+				/*sprintf(temp, "History Best:");
 				OLEDFB_drawText(20,48,temp);
 				sprintf(temp, "%d.%d%d%d", historyBest/1000, (historyBest/100)%10, (historyBest/10)%10, historyBest%10);
-				OLEDFB_drawText(28,56,temp);
+				OLEDFB_drawText(28,56,temp);*/
 			}
 			break;
 		}
 	}
 }
+
 static void eventHandler(int event, int data)
 {
 	switch(event)
@@ -161,6 +174,8 @@ static void eventHandler(int event, int data)
 		case STATE_COUNT_DOWN:
 			//TODO : Implement return to menu.
 			if(data == KEY_D);
+			keyPressedTime = gameBeginTime = 0;
+			setState(STATE_GAMEOVER);
 			break;
 		case STATE_GAME:
 			if(keyPressedTime == 0) keyPressedTime = Timer_getSystemTime();
