@@ -8,6 +8,8 @@
 #ifndef APPALARMCLOCK_H_
 #define APPALARMCLOCK_H_
 
+extern App AppAlarmClock_theApp;
 
+void AppAlarmClock_init();
 
 #endif /* APPALARMCLOCK_H_ */
