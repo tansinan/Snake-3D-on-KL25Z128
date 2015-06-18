@@ -414,9 +414,24 @@ static void animationTimerHandler()
 			}
 			snakeGame.snakePositions[0][0] = newX;
 			snakeGame.snakePositions[0][1] = newY;
+			for(int i=1;i<snakeGame.snakeLength;i++)
+			{
+				if(snakeGame.snakePositions[i][0]==newX && snakeGame.snakePositions[i][1]==newY)
+				{
+					setState(STATE_GAMEOVER);
+				}
+			}
 			if(snakeGame.map[newX][newY] == MAP_FOOD)
 			{
-				snakeGame.map[newX][newY] == MAP_NORMAL;
+				snakeGame.map[newX][newY] = MAP_NORMAL;
+				int newFoodX,newFoodY;
+				do
+				{
+					newFoodX = rand()%20;
+					newFoodY = rand()%20;
+				}
+				while(snakeGame.map[newFoodX][newFoodY]!=MAP_NORMAL);
+				snakeGame.map[newFoodX][newFoodY] = MAP_FOOD;
 				snakeGame.snakeLength++;
 				score++;
 				if(snakeGame.snakeLength > 20) snakeGame.snakeLength = 20;
