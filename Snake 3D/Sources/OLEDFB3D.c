@@ -148,30 +148,6 @@ void OLEDFB3D_drawLine3D(Vec3D point1, Vec3D point2)
 	Vec3D rel1, rel2;
 	OLEDFB3D_prepareProjectPoint(point1, rel1);
 	OLEDFB3D_prepareProjectPoint(point2, rel2);
-	/*if(rel1[2]>-0.01 && rel2[2]>-0.01)
-	{
-		return;
-	}
-	else if(rel1[2] > -0.01)
-	{
-		Vec3D newRel1 = 
-		{
-			rel1[0] + (rel1[0]-rel2[0])/(rel1[2]-rel2[2])*(-0.001-rel1[2]),
-			rel1[1] + (rel1[1]-rel2[1])/(rel1[2]-rel2[2])*(-0.001-rel1[2]),
-			-0.001
-		};
-		for(int i=0;i<3;i++) rel1[i] = newRel1[i];
-	}
-	else if(rel2[2] > -0.01)
-	{
-		Vec3D newRel2 = 
-		{
-			rel2[0] + (rel2[0]-rel1[0])/(rel2[2]-rel1[2])*(-0.001-rel2[2]),
-			rel2[1] + (rel2[1]-rel1[1])/(rel2[2]-rel1[2])*(-0.001-rel2[2]),
-			-0.001
-		};
-		for(int i=0;i<3;i++) rel2[i] = newRel2[i];
-	}*/
 	Vec2D point2D1 = {
 		-rel1[0] / rel1[2] * focalLength + 64,
 		16 + rel1[1] / rel1[2] * focalLength
